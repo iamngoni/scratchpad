@@ -76,7 +76,7 @@ packages:
     source: sdk
     version: "0.0.0"
   handy_extensions:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: handy_extensions
       sha256: "3cd4a5748f4229d40bffdc20575e9e25fd0128d5d7794db3e049063e01d06cfe"

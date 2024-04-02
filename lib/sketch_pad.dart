@@ -6,10 +6,8 @@
 //  Copyright (c) 2024 ModestNerds, Co
 //
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:handy_extensions/handy_extensions.dart';
 import 'package:relative_scale/relative_scale.dart';
 
 import 'canvas_painter.dart';
@@ -99,6 +97,48 @@ class _SketchPadState extends State<SketchPad> {
     }
   }
 
+  void openColorPicker() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Pick a color!',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (Color color) {
+                pickerColor = color.withOpacity(0.2);
+                selectedColor = color.withOpacity(0.2);
+                context.goBack();
+              },
+            ),
+          ),
+        );
+      },
+    );
+    setState(() {
+      pickColor(pickerColor);
+    });
+  }
+
+  void setToEraserMode() {
+    setState(() {
+      selectedColor = const Color.fromARGB(250, 250, 250, 250);
+    });
+  }
+
+  void clearCanvas() {
+    setState(() {
+      points.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return RelativeBuilder(
@@ -163,253 +203,35 @@ class _SketchPadState extends State<SketchPad> {
               ),
             ),
           ),
-          bottomNavigationBar: BottomAppBar(
-            child: Container(
-              width: context.width,
-              height: sy(50),
-              margin: EdgeInsets.symmetric(
-                horizontal: sx(10),
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.color_lens),
+                label: 'Color',
               ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/background-tablet.png'),
-                  fit: BoxFit.cover,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -1),
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(30),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.brush),
+                label: 'Stroke',
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        context.goBack();
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.chevron_left,
-                            size: sy(30),
-                            color: Colors.white,
-                          ),
-                          Text(
-                            'HOME',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        showDialog<void>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(
-                                'Pick a color!',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: sy(15),
-                                ),
-                              ),
-                              content: SingleChildScrollView(
-                                child: BlockPicker(
-                                  pickerColor: pickerColor,
-                                  onColorChanged: (Color color) {
-                                    pickerColor = color.withOpacity(0.2);
-                                    selectedColor = color.withOpacity(0.2);
-                                    context.goBack();
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                        setState(() {
-                          pickColor(pickerColor);
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image: const AssetImage(
-                                'assets/icons/color-wheel.png'),
-                            height: sy(30),
-                            width: sy(30),
-                          ),
-                          Text(
-                            'COLORS',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: pickStroke,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image: const AssetImage('assets/icons/brush.png'),
-                            color: Colors.white,
-                            height: sy(30),
-                            width: sy(30),
-                          ),
-                          Text(
-                            'BRUSH',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedColor =
-                              const Color.fromARGB(250, 250, 250, 250);
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image: const AssetImage('assets/icons/eraser.png'),
-                            color: Colors.white,
-                            height: sy(30),
-                            width: sy(30),
-                          ),
-                          Text(
-                            'ERASER',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: unDo,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image: const AssetImage('assets/icons/undo.png'),
-                            color: Colors.white,
-                            height: sy(30),
-                            width: sy(30),
-                          ),
-                          Text(
-                            'UNDO CHANGES',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image: const AssetImage('assets/icons/reload.png'),
-                            color: Colors.white,
-                            height: sy(30),
-                            width: sy(30),
-                          ),
-                          Text(
-                            'RELOAD',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          points.clear();
-                        });
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            CupertinoIcons.delete_left_fill,
-                            size: sy(30),
-                            color: Colors.white,
-                          ),
-                          Text(
-                            'CLEAR',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image:
-                                const AssetImage('assets/icons/download.png'),
-                            color: Colors.white,
-                            height: sy(30),
-                            width: sy(30),
-                          ),
-                          Text(
-                            'SAVE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: sy(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.undo),
+                label: 'Undo',
               ),
-            ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.delete),
+                label: 'Clear',
+              ),
+            ],
+            onTap: (index) {
+              return switch (index) {
+                0 => openColorPicker(),
+                1 => pickStroke(),
+                2 => unDo(),
+                3 => clearCanvas(),
+                _ => null,
+              };
+            },
           ),
         );
       },

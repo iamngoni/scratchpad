@@ -11,12 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_colorpicker:
+  handy_extensions:
   relative_scale:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  handy_extensions:
   very_good_analysis: ^5.1.0
 
 flutter:
